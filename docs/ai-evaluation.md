@@ -19,3 +19,5 @@ Combine quantitative measures with qualitative inspection when appropriate. Docu
 ## Related topics
 
 Evaluation is part of a broader [human-AI system](human-ai-systems.md) and depends on well-selected [context](context-engineering.md).
+
+Where this is practised: see the [evidence page](evidence.md).

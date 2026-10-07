@@ -14,7 +14,9 @@ This repository is a knowledge system first and a software project second. It fa
 - [Natural language programming](docs/natural-language-programming.md) — expressing intent in natural language while preserving rigor
 - [Virtual anthropology](docs/virtual-anthropology.md) — studying behavior and culture in digital environments
 
-Start with the [documentation index](docs/index.md) for an overview and suggested paths through these topics.
+Start with the [documentation index](docs/index.md) for an overview and suggested paths through these topics. [Where this is practised](docs/evidence.md) maps each topic to the repository that already applies it.
+
+The pages are published at https://dermot-r-cochran.github.io/engineering-intelligence/ .
 
 ## Contributing
 

@@ -17,3 +17,5 @@ Engineering work takes place within a context: goals, constraints, tools, prior 
 ## Related topics
 
 Explore [human-AI systems](human-ai-systems.md), [AI evaluation](ai-evaluation.md), and [repository-aware development](repository-aware-development.md).
+
+Where this is practised: see the [evidence page](evidence.md).
