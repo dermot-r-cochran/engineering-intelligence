@@ -19,3 +19,5 @@ AI tools can help navigate and modify a codebase, but they can miss implicit con
 ## Related topics
 
 See [context engineering](context-engineering.md) for curating repository context and [natural language programming](natural-language-programming.md) for expressing change intent.
+
+Where this is practised: see the [evidence page](evidence.md).

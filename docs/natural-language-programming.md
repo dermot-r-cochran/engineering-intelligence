@@ -19,3 +19,5 @@ The person using the system remains responsible for judging whether the result i
 ## Related topics
 
 See [repository-aware development](repository-aware-development.md) for grounding changes in a codebase and [AI evaluation](ai-evaluation.md) for verifying system behavior.
+
+Where this is practised: see the [evidence page](evidence.md).

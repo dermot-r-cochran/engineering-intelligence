@@ -19,3 +19,5 @@ Research should respect privacy, consent, safety, and the expectations of the co
 ## Related topics
 
 See [human-AI systems](human-ai-systems.md) for social dimensions of AI use and [engineering intelligence](engineering-intelligence.md) for connecting observation to better decisions.
+
+Where this is practised: see the [evidence page](evidence.md).

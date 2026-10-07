@@ -19,3 +19,5 @@ Context is not a substitute for evaluation. Information may be incomplete, stale
 ## Related topics
 
 Context is a core part of [repository-aware development](repository-aware-development.md) and [human-AI systems](human-ai-systems.md).
+
+Where this is practised: see the [evidence page](evidence.md).

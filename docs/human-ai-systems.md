@@ -19,3 +19,5 @@ AI outputs can be fluent without being accurate, complete, or appropriate. Syste
 ## Related topics
 
 See [context engineering](context-engineering.md) for supplying useful context and [AI evaluation](ai-evaluation.md) for assessing system behavior.
+
+Where this is practised: see the [evidence page](evidence.md).

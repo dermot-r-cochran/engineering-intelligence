@@ -12,6 +12,10 @@ Engineering Intelligence examines how people, AI, repositories, and knowledge pr
 - [Natural language programming](natural-language-programming.md) — using natural language to specify and shape computational work.
 - [Virtual anthropology](virtual-anthropology.md) — observing practices, norms, and relationships in digital environments.
 
+## Evidence
+
+[Where this is practised](evidence.md) maps every topic to a repository that already applies it, so each principle can be checked against a record rather than taken on trust.
+
 ## Suggested paths
 
 - **Building with AI:** Start with [human-AI systems](human-ai-systems.md), then read [context engineering](context-engineering.md) and [AI evaluation](ai-evaluation.md).

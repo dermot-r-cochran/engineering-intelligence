@@ -1,0 +1,8 @@
+title: Engineering Intelligence
+description: How people, repositories, knowledge systems, evaluation frameworks and AI work together to improve engineering, research, creativity and decision-making.
+theme: jekyll-theme-minimal
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: false
