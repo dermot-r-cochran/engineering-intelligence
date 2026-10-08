@@ -18,6 +18,8 @@ What holds up is thinner than a framework. A specification with a conformance te
 
 The repository-aware question that follows is which shared things still describe the current context and which are records of an earlier one. Both are evidence; only the first is a constraint.
 
+The expectation that reuse pays is not wrong; it is aimed at a unit that has moved. When writing code was the expensive part, reusing code was the lever. Now the expensive parts are around the code: knowing what it must satisfy, how to tell whether it does, and why an earlier decision was made. Those reuse well, as tests, contracts, decision records and worked examples a new repository can read and copy from, because they come from experience a generator does not have. A component that wraps them in last year's idiom is cheap to regenerate, and the regeneration usually fits better. The exception is where the shared thing is itself the fact, a protocol, a schema everyone speaks, a security boundary; there divergence costs more than any awkwardness, and the discipline runs the other way.
+
 ## Questions to ask
 
 - Which files and interfaces define the behavior being changed?
