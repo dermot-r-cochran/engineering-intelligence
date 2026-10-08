@@ -1,0 +1,18 @@
+name: Links
+
+# AGENTS.md asks every contributor to verify that links to repository pages
+# resolve. This is that check, run on every pull request: standard-library
+# Python, nothing installed, under a minute. External links are out of scope.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check that relative links resolve
+        run: python3 tools/check_links.py
