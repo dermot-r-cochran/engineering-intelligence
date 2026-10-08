@@ -8,6 +8,18 @@ Before changing code, understand the relevant behavior, nearby patterns, and ava
 
 AI tools can help navigate and modify a codebase, but they can miss implicit constraints or produce plausible changes that do not fit. Human review should check whether a change solves the actual problem, aligns with repository conventions, and has been adequately tested.
 
+## Shared code ages at the rate of what it abstracted
+
+Reusable components, SDKs and templates tend to lose relevance over time, until new repositories set them aside or work around them and write fresh code instead. This is not usually a failure of the component's quality. A reusable thing is a bet on what will stay the same, and it loses relevance at the rate at which that thing changes. A component that abstracted a fact that held, such as a protocol, a data shape or a regulatory rule, keeps earning its place. One that abstracted a convenience of its moment, such as a framework's idiom, a team's preferences or the deployment target of the day, ages as those conveniences change, which is every few years.
+
+Three conditions make the decline faster. A shared library has an owner and a consumer, and the owner's reasons to change it rarely match the consumer's reasons at the moment the consumer needs it, so the consumer forks or works around rather than waits. A template is copied, not linked, so a new repository receives whatever the template believed on the day it was copied and has no path to what it learns later. And generated code has changed the arithmetic: when fresh code costs an afternoon, understanding and bending a stale component can cost more, and a rational team writes fresh.
+
+What holds up is thinner than a framework. A specification with a conformance test outlives several generations of implementation, because it says what must be true rather than how. A reference implementation that a new repository can read and copy the relevant part of outlives one it must depend on whole. And a retirement rule beats silent decay: a component not adopted by the next two repositories that could have used it is marked as superseded, with the reason, so later work goes around it on purpose rather than by discovery.
+
+The repository-aware question that follows is which shared things still describe the current context and which are records of an earlier one. Both are evidence; only the first is a constraint.
+
+The expectation that reuse pays is not wrong; it is aimed at a unit that has moved. When writing code was the expensive part, reusing code was the lever. Now the expensive parts are around the code: knowing what it must satisfy, how to tell whether it does, and why an earlier decision was made. Those reuse well, as tests, contracts, decision records and worked examples a new repository can read and copy from, because they come from experience a generator does not have. A component that wraps them in last year's idiom is cheap to regenerate, and the regeneration usually fits better. The exception is where the shared thing is itself the fact, a protocol, a schema everyone speaks, a security boundary; there divergence costs more than any awkwardness, and the discipline runs the other way.
+
 ## Questions to ask
 
 - Which files and interfaces define the behavior being changed?
