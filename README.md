@@ -18,6 +18,8 @@ Start with the [documentation index](docs/index.md) for an overview and suggeste
 
 The pages are published at https://dermot-r-cochran.github.io/engineering-intelligence/ .
 
+What this README claims is checked on every pull request: that the list above names every topic page under `docs/` and nothing else (`tools/check_docs.py`), and that every link to a repository page resolves (`tools/check_links.py`). The principles themselves are not claims code can prove; [Where this is practised](docs/evidence.md) is their evidence.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidance on proposing additions and improvements. Repository-specific working guidance is in [AGENTS.md](AGENTS.md).

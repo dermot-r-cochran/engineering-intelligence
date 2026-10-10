@@ -16,3 +16,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check that relative links resolve
         run: python3 tools/check_links.py
+      - name: Check that the README lists every topic page and no file has two front-matter blocks
+        run: python3 tools/check_docs.py
