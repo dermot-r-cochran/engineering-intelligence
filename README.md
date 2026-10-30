@@ -20,6 +20,10 @@ The pages are published at https://dermot-r-cochran.github.io/engineering-intell
 
 What this README claims is checked on every pull request: that the list above names every topic page under `docs/` and nothing else (`tools/check_docs.py`), and that every link to a repository page resolves (`tools/check_links.py`). The principles themselves are not claims code can prove; [Where this is practised](docs/evidence.md) is their evidence.
 
+## Related
+
+- [Where this is practised](docs/evidence.md) maps each topic to a repository. The companion view, what crosses between those repositories (files, data, a licence or a public description), is kept in one map: [RELATED-REPOSITORIES.md](https://github.com/dermot-r-cochran/star-rangers/blob/main/RELATED-REPOSITORIES.md).
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidance on proposing additions and improvements. Repository-specific working guidance is in [AGENTS.md](AGENTS.md).
