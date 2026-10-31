@@ -16,7 +16,7 @@ Every page in this knowledge base states a principle. This page is the evidence:
 ## How to read this page
 
 - A repository listed here is evidence that the principle has been tried, not that it is right. Where a repository's own record says a principle failed, that is the more useful entry, and it belongs here too.
-- A private repository is named so the author can check the claim, and left unlinked for everyone else.
+- A private repository is described, never named or linked: the description is enough for the author to check the claim, and nothing private is named in a public repository.
 - A topic page links back to this page rather than repeating it, so the mapping has one home.
 
 ## Open
