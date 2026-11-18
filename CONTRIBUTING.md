@@ -20,3 +20,23 @@ Contributions that make the repository more useful, accurate, and navigable are 
 ## Submitting changes
 
 Keep changes focused and use descriptive commit or pull request summaries. For substantive changes, describe the problem, the evidence or reasoning behind the proposed approach, and any unresolved questions. Documentation-only changes do not need a software test suite; check links, spelling, and Markdown structure before submitting.
+
+Before pushing, run the checks CI runs:
+
+```bash
+python3 tools/check_links.py
+python3 tools/check_docs.py
+```
+
+## How a pull request is reviewed
+
+The repository has one maintainer, Dermot Cochran, so a pull request may wait a while before anyone looks at it.
+
+- CI must be green. A failing check is the first thing to fix.
+- The review may be assisted by an AI tool, which reads the change and reports to the maintainer. It does not approve or merge anything.
+- **Every outside pull request is merged by the maintainer, never by an automated process or an AI tool,** however small.
+- A pull request may be declined, or asked to change shape, when it moves the project somewhere it is not meant to go. That is not a judgement on the work.
+
+## Licence
+
+Contributions are accepted under this repository's licence, the MIT License (`LICENSE`), the same terms everyone else receives it under. No sign-off line and no contributor licence agreement are required. Only contribute work you have the right to license on these terms.
