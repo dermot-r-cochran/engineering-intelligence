@@ -40,3 +40,7 @@ The repository has one maintainer, Dermot Cochran, so a pull request may wait a 
 ## Licence
 
 Contributions are accepted under this repository's licence, the MIT License (`LICENSE`), the same terms everyone else receives it under. No sign-off line and no contributor licence agreement are required. Only contribute work you have the right to license on these terms.
+
+## Security
+
+Please don't describe a security problem in a public issue or pull request. Report it privately instead, through the repository's **Security** tab (*Report a vulnerability*). Only the maintainer sees the report.
