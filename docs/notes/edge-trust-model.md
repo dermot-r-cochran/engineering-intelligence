@@ -136,6 +136,19 @@ Nothing else raises trust. Not a signature, which at most helps say which source
 
 This differs from ADR-0007 as proposed in three places: section 1 makes a signature from an enrolled key a condition of admission, section 3 has a person set each pair's starting trust (here no human-set score counts), and section 4 counts checks made outside the swarm (a person's inspection, a reference instrument) as checks of a node, where this note treats them as data sources a report is compared against. These fit only if signatures are read as attribution, the person-set figure is replaced by the neutral prior, and an outside check counts as one more data source the node compares reports against. Whether to amend ADR-0007 is a matter for swarm, not this note.
 
+**Design: within a context, trust has facets.** Trust is multi-faceted, depending on the context (the author, 23 November 2026). A source can be accurate but late, or prompt but careless, or truthful about what it saw but overconfident about how sure it is. One figure per context would average those apart. So within each pair of source and context, the node keeps one record per facet, each a Beta record of its own, built from the same two kinds of evidence as above:
+
+- **The set of facets is a parameter, `trust_facets`, not a fixed list.** A deployment names the facets that matter for its sources and contexts. The facets this note starts from are:
+  - *accuracy*: whether the source's reports match ground truth and independent sources;
+  - *timeliness*: whether reports arrive while they are still useful, and carry times that hold up;
+  - *consistency*: whether the source agrees with its own earlier reports on the same thing;
+  - *honesty*: whether what the source says about its own reports (how sure it is, what kind of observation it is, what conditions it was in) matches what the node finds.
+
+  A facet can be added for a deployment without changing the others, and a facet nobody names is not kept.
+- **Facets do not borrow from each other.** A good accuracy record lends nothing to timeliness. As with contexts, distrust may travel where trust may not: a fall in one facet, honesty above all, is a reason to review the others.
+- **The use decides which facets count.** When a report is admitted, its weight comes from the facets relevant to the use it is put to. A late but accurate reading may still settle a historical belief, and the same reading may be no use for a decision that had to be made in time. How the relevant facets combine into one weight is a pluggable rule, `facet_combination`. The default is the lowest of the relevant facets, so a source is admitted at its weakest relevant facet and a strong facet never hides a weak one.
+- **Every facet is watched for shifts on its own.** The covert-source handling below runs per facet, so a source that keeps its accuracy while its honesty drifts is still caught.
+
 ### Threat: the covert source
 
 The author names this threat (23 November 2026): *a covert node or agent may pretend to be good, then shift its behaviour in subtle ways, behaving in malicious ways or even accidentally contradicting itself.* A trust model built on behaviour over time is exactly what such a source exploits: it earns a record, then spends it. The shift may be sudden, which the behaviour test above catches, or slow and small enough that each report on its own looks normal.
@@ -165,7 +178,7 @@ What this does not claim: a shift slower than the longest window, or one that st
 
 ## Principles
 
-These are the design's fixed points, twelve of them. A deployment may tune every parameter below, but no setting may break one of these.
+These are the design's fixed points, thirteen of them. A deployment may tune every parameter below, but no setting may break one of these.
 
 1. **Evidence is admitted on its grounds, never on agreement, repetition, volume or fluency.** (Enforced in swarm for one store; proposed for peers in ADR-0006 and ADR-0007.)
 2. **Confidence and trust are derived from counts, never written.** (Enforced in swarm and careful-memory for beliefs; proposed for node trust in ADR-0007.)
@@ -179,6 +192,7 @@ These are the design's fixed points, twelve of them. A deployment may tune every
 10. **Trust rests on behaviour over time and consistency with other data sources.** It is built per node and per source. Ground truth outranks agreement, agreement counts only across sources that share no cause, no human-set score counts, and a change in behaviour is itself evidence. (Design; the author, 23 November 2026.)
 11. **A record is never a licence, and checking never stops.** Weight stays bounded however good the record; every source, however trusted, keeps being checked against other sources and against itself; a shift, sudden or slow, malicious or accidental, opens a review without rewriting history. (Design; the author, 23 November 2026.)
 12. **Trust is held per source and per context.** A good record in one context lends nothing to another. A shift in one context prompts a review in the others, and the node, not the source, decides which context a report belongs to. (Design; the author, 23 November 2026.)
+13. **Within a context, trust has facets, and the use decides which count.** The set of facets is configurable. Facets do not borrow from each other, and by default a report is admitted at its weakest relevant facet. (Design; the author, 23 November 2026.)
 
 ## Parameters
 
@@ -193,6 +207,8 @@ Each choice the first draft left as an open question is now a parameter. The def
 | `starting_trust` | across | the neutral (uniform) prior; never a person-set figure | neutral, with reports treated as leads until a record is built | 1, 10 |
 | `behaviour_window` | across | several durations or report counts, short to long | left open; a deployment sets them to the pace its sources change at | 10, 11 |
 | `trust_context` | across | a pluggable definition: kind of observation, plus conditions and stakes as the deployment names them | kind of observation alone (ADR-0007's pair), until a deployment names more | 12 |
+| `trust_facets` | across | a configurable set; this note starts from accuracy, timeliness, consistency and honesty | those four, until a deployment names its own | 13 |
+| `facet_combination` | across | a pluggable rule over the facets relevant to a use | the lowest relevant facet | 13 |
 | `trust_ceiling` | across | a figure below certainty | left open; no source's record lifts it past this | 11 |
 | `check_selection` | across | a pluggable rule for which reports get checked | every source keeps being checked, and the source cannot predict which reports | 11 |
 | `behaviour_shift_test` | across | a pluggable test of rate, range, pattern or self-consistency against the source's own history | flag and review; never silently lower stored beliefs | 3, 10, 11 |
