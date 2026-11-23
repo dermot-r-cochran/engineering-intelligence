@@ -109,26 +109,32 @@ Default: `each_time` where a person is present, and otherwise `pre_approved` wit
 
 Both records are Proposed, and ADR-0007 lapses if ADR-0006 is not accepted. Neither has a guard test yet; each gets one on acceptance.
 
-**Design: trust is earned locally, from outcomes the node verifies itself.** Two weak links are designed out (the author, 23 November 2026):
+**Design: trust rests on behaviour over time and consistency with other data sources.** Two weak links are designed out, and one basis is put in their place (the author, 23 November 2026):
 
 - **Key management is a weak link.** A key can be copied from a device that is taken apart, lost with it, or never rotated, and a scheme whose trust depends on keys staying secret fails quietly when one does not.
-- **Peer trust is not reliable either.** A peer's report about the world, its vouching for another peer, and its record of its own accuracy are all things the receiving node has not seen. Trust passed from node to node spreads one mistake or one compromised node across the network.
+- **Peer trust is not reliable either.** A peer's vouching for another peer, a shared reputation score and a peer's record of its own accuracy are all things the receiving node has not seen. Trust passed from node to node spreads one mistake or one compromised node across the network.
+- **What trust rests on instead:** a source's behaviour over time, and the consistency of what it reports with other data sources.
 
-So in this design each node holds its own trust in each peer, and that trust rises only on outcomes the node verifies itself: a peer's report is later confirmed or contradicted by the node's own observation, measurement or check. Nothing else raises it. Not a signature, which at most helps say which peer a report claims to come from. Not another peer's trust, endorsement or agreement, so trust never passes from one node to another. Not the peer's volume, time online or own claims. Consequences:
+So each node holds its own trust in each source (a peer, or one of its own sensors), built from two kinds of evidence it can assess itself:
 
-- **A peer starts with no trust.** Its reports are recorded as claims, which are proposals and never beliefs, and they move nothing until the node has verified some of them. A report the node can never check never earns any weight.
-- **A copied key or a compromised peer gains little.** Whoever holds it can send reports only at the trust this node has already earned for that peer, each still capped by `max_confidence_delta` and deduplicated within its correlation group. A report the node later finds wrong lowers that trust.
-- **Attribution is pluggable.** How a report is tied to a peer is a parameter, `attribution`: a signature, the physical channel it arrived on, or a combination. No choice changes the weight, because the weight comes only from the node's own verified outcomes.
-- **No global score.** Two nodes may hold different trust in the same peer, because each verified different outcomes. That is intended: there is no shared trust table to poison.
+1. **Consistency with other data sources.** A report is compared with independent sources bearing on the same thing: the node's own sensors, a reference instrument, a later ground truth, or another source in a different correlation group. Consistency adds to α and inconsistency to β, by the ADR-0005 arithmetic. Sources in the same correlation group are not independent of each other, so they cannot confirm each other. This is how the rule "agreement between peers is not evidence" is kept: agreement counts only across sources that do not share a cause, and peers merely repeating one another never do.
+2. **Behaviour over time.** A source's record is kept as a time series, not only as a total. A long consistent record earns more than a short one, but it is never a licence. A change in behaviour, such as a source that was consistent and stops being, or one whose reports suddenly shift in rate, range or pattern, is itself evidence. A shift triggers a review of that source and lowers the weight of its newer reports until they are consistent again. This guards against a node that behaves well to build a record and then switches.
 
-This differs from ADR-0007 as proposed in three places: section 1 makes a signature from an enrolled key a condition of admission, section 3 has a person set each pair's starting trust, and section 4 counts checks made outside the swarm (a person's inspection, a reference instrument) without saying that the receiving node verified them. All three are compatible only if signatures are read as attribution, a person's setting can lower trust but never raise it above what the node has verified, and an outside check counts only once the node has the result in hand. Whether to amend ADR-0007 is a matter for swarm, not this note.
+Nothing else raises trust. Not a signature, which at most helps say which source a report claims to come from. Not another peer's trust or endorsement, so trust never passes from one node to another. Not volume, time online without checks, or the source's own claims. Consequences:
+
+- **A new source starts with no trust.** Its reports are recorded as claims, which are proposals and never beliefs, until enough of them have been compared with other sources. A report that no other source can ever bear on earns no weight.
+- **A copied key or a compromised peer gains little.** Whoever holds it can send reports only at the trust this node has already built for that source. Each report is still capped by `max_confidence_delta` and deduplicated within its correlation group, and a change in behaviour lowers the weight of new reports.
+- **Attribution is pluggable.** How a report is tied to a source is a parameter, `attribution`: a signature, the physical channel it arrived on, or a combination. No choice changes the weight.
+- **No global score.** Two nodes may hold different trust in the same source, because each compared it against different data. That is intended: there is no shared trust table to poison.
+
+This differs from ADR-0007 as proposed in three places: section 1 makes a signature from an enrolled key a condition of admission, section 3 has a person set each pair's starting trust, and section 4 counts checks made outside the swarm (a person's inspection, a reference instrument) as checks of a node, where this note treats them as data sources a report is compared against. All three fit only if signatures are read as attribution, a person's setting can lower trust but never raise it above what consistency and behaviour support, and an outside check counts as one more data source the node compares reports against. Whether to amend ADR-0007 is a matter for swarm, not this note.
 
 ## Gaps
 
 | Gap | What exists | What is missing |
 | --- | --- | --- |
-| Peer trust | swarm ADR-0006 and ADR-0007, Proposed | Acceptance, a source field on `Evidence` (a breaking change, per ADR-0007), a per-node trust table earned only from the node's own verified outcomes (see *Across the layers*), and guard tests. foundation-model's agreement-based reputation contradicts it today. |
-| Device identity | ADR-0007 section 1, Proposed | Any code, and an `attribution` method whose failure costs no more than the trust a node has already verified for that peer (see *Across the layers*). |
+| Peer trust | swarm ADR-0006 and ADR-0007, Proposed | Acceptance, a source field on `Evidence` (a breaking change, per ADR-0007), a per-node trust table built from behaviour over time and consistency with other data sources (see *Across the layers*), and guard tests. foundation-model's agreement-based reputation contradicts it today. |
+| Device identity | ADR-0007 section 1, Proposed | Any code, and an `attribution` method whose failure costs no more than the trust a node has already built for that source (see *Across the layers*). |
 | Offline sync | ADR-0007 section 6 (late reports), Proposed; careful-memory ADR-0015 (optimistic locking), accepted, not built | How two stores that diverged while offline are merged. Append-only records help, since nothing is overwritten, but no repository says what happens when two devices revised the same belief apart. |
 | Rate limiting across devices | careful-memory ADR-0013 (Redis), accepted, not built | The distributed limiter, needed only where `rate_limit_scope` is `shared` (see layer 3). |
 | Shared causes | Stated as a limit in swarm ADR-0005; declared groups in ADR-0007 | Undeclared correlation still counts twice. No repository claims to detect it. |
@@ -137,7 +143,7 @@ This differs from ADR-0007 as proposed in three places: section 1 makes a signat
 
 ## Principles
 
-These are the design's fixed points, nine of them. A deployment may tune every parameter below, but no setting may break one of these.
+These are the design's fixed points, ten of them. A deployment may tune every parameter below, but no setting may break one of these.
 
 1. **Evidence is admitted on its grounds, never on agreement, repetition, volume or fluency.** (Enforced in swarm for one store; proposed for peers in ADR-0006 and ADR-0007.)
 2. **Confidence and trust are derived from counts, never written.** (Enforced in swarm and careful-memory for beliefs; proposed for node trust in ADR-0007.)
@@ -147,7 +153,8 @@ These are the design's fixed points, nine of them. A deployment may tune every p
 6. **Nothing leaves except through one door, by default it is refused, and what leaves is recorded.** (Enforced on one machine; design for the edge.)
 7. **A check that guards the device runs on the device.** It needs no network to say no. (Design, following ADR-0007 section 8.)
 8. **Trust never rests on a cryptographic signature or a secret key.** A signature may help attribute a report; it never adds weight, and the design holds when a key is copied. (Design; the author, 23 November 2026.)
-9. **Trust never passes from peer to peer.** Each node earns trust in each peer only from outcomes it verifies itself; no endorsement, shared score or peer's self-report raises it. (Design; the author, 23 November 2026.)
+9. **Trust never passes from peer to peer.** No endorsement, shared score or self-report raises it. (Design; the author, 23 November 2026.)
+10. **Trust rests on behaviour over time and consistency with other data sources.** It is built per node and per source. Agreement counts only across sources that share no cause, and a change in behaviour is itself evidence. (Design; the author, 23 November 2026.)
 
 ## Parameters
 
@@ -159,7 +166,9 @@ Each choice the first draft left as an open question is now a parameter. The def
 | `aggregation_method` | 4 | `exact_allocation`, `weighted_average` | by the shape of the decision | 4 |
 | `weight_source` | 4 | the trust layer only | the trust layer | 1, 4 |
 | `egress_approval` | 5 | `each_time`, `pre_approved` | `each_time` if attended, else `pre_approved` with an empty list | 6 |
-| `starting_trust` | across | zero, or a figure below the admission threshold | zero: nothing a peer sends moves a belief until the node has verified some of it | 1, 9 |
+| `starting_trust` | across | zero, or a figure below the admission threshold | zero: nothing a source sends moves a belief until enough of it has been compared with other sources | 1, 10 |
+| `behaviour_window` | across | a duration or a count of reports | left open; a deployment sets it to the pace its sources change at | 10 |
+| `behaviour_shift_test` | across | a pluggable test of rate, range or pattern against the source's own history | flag and review; never silently lower stored beliefs | 3, 10 |
 | `trust_decay_without_checks` | across | none, or towards the starting figure | none | 2 |
 | `correlation_window` | across | a duration | left to ADR-0007's acceptance | 1 |
 | `attribution` | across | signature, physical channel, or a combination | whatever the deployment has; it never changes the weight | 8, 9 |
