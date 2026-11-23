@@ -158,7 +158,7 @@ What this does not claim: a shift slower than the longest window, or one that st
 
 ## Principles
 
-These are the design's fixed points, ten of them. A deployment may tune every parameter below, but no setting may break one of these.
+These are the design's fixed points, eleven of them. A deployment may tune every parameter below, but no setting may break one of these.
 
 1. **Evidence is admitted on its grounds, never on agreement, repetition, volume or fluency.** (Enforced in swarm for one store; proposed for peers in ADR-0006 and ADR-0007.)
 2. **Confidence and trust are derived from counts, never written.** (Enforced in swarm and careful-memory for beliefs; proposed for node trust in ADR-0007.)
@@ -169,7 +169,10 @@ These are the design's fixed points, ten of them. A deployment may tune every pa
 7. **A check that guards the device runs on the device.** It needs no network to say no. (Design, following ADR-0007 section 8.)
 8. **Trust never rests on a cryptographic signature or a secret key.** A signature may help attribute a report; it never adds weight, and the design holds when a key is copied. (Design; the author, 23 November 2026.)
 9. **Trust never passes from peer to peer.** No endorsement, shared score or self-report raises it. (Design; the author, 23 November 2026.)
-10. **Trust rests on behaviour over time and consistency with other data sources.** It is built per node and per source. Ground truth outranks agreement, agreement counts only across sources that share no cause, no human-set score counts, and a change in behaviour is itself evidence. 
+10. **Trust rests on behaviour over time and consistency with other data sources.** It is built per node and per source. Ground truth outranks agreement, agreement counts only across sources that share no cause, no human-set score counts, and a change in behaviour is itself evidence. (Design; the author, 23 November 2026.)
+11. **A record is never a licence, and checking never stops.** Weight stays bounded however good the record; every source, however trusted, keeps being checked against other sources and against itself; a shift, sudden or slow, malicious or accidental, opens a review without rewriting history. (Design; the author, 23 November 2026.)
+
+## Parameters
 
 Each choice the first draft left as an open question is now a parameter. The default is the safe setting when nothing else is known.
 
@@ -180,8 +183,10 @@ Each choice the first draft left as an open question is now a parameter. The def
 | `weight_source` | 4 | the trust layer only | the trust layer | 1, 4 |
 | `egress_approval` | 5 | `each_time`, `pre_approved` | `each_time` if attended, else `pre_approved` with an empty list | 6 |
 | `starting_trust` | across | the neutral (uniform) prior; never a person-set figure | neutral, with reports treated as leads until a record is built | 1, 10 |
-| `behaviour_window` | across | a duration or a count of reports | left open; a deployment sets it to the pace its sources change at | 10 |
-| `behaviour_shift_test` | across | a pluggable test of rate, range or pattern against the source's own history | flag and review; never silently lower stored beliefs | 3, 10 |
+| `behaviour_window` | across | several durations or report counts, short to long | left open; a deployment sets them to the pace its sources change at | 10, 11 |
+| `trust_ceiling` | across | a figure below certainty | left open; no source's record lifts it past this | 11 |
+| `check_selection` | across | a pluggable rule for which reports get checked | every source keeps being checked, and the source cannot predict which reports | 11 |
+| `behaviour_shift_test` | across | a pluggable test of rate, range, pattern or self-consistency against the source's own history | flag and review; never silently lower stored beliefs | 3, 10, 11 |
 | `trust_decay_without_checks` | across | none, or towards the starting figure | none | 2 |
 | `correlation_window` | across | a duration | left to ADR-0007's acceptance | 1 |
 | `attribution` | across | signature, physical channel, or a combination | whatever the deployment has; it never changes the weight | 8, 9 |
