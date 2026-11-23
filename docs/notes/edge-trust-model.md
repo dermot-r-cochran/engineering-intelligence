@@ -127,7 +127,28 @@ Nothing else raises trust. Not a signature, which at most helps say which source
 - **Attribution is pluggable.** How a report is tied to a source is a parameter, `attribution`: a signature, the physical channel it arrived on, or a combination. No choice changes the weight.
 - **No global score.** Two nodes may hold different trust in the same source, because each compared it against different data. That is intended: there is no shared trust table to poison.
 
+**Design: trust is held per context, not per source.** A source may be semi-trusted in one context and less so in another (the author, 23 November 2026). A temperature probe can be reliable indoors and drift in direct sun. A peer can be sound on its own site's readings and poor at summarising another's logs. An agent can be careful with routine requests and careless with unusual ones. So the record described above is kept for each pair of source and context, never for the source alone:
+
+- **A context is more than a kind of observation.** ADR-0007 already holds trust per node and per kind of observation. Here a context can also include the conditions a report was made under (place, time of day, operating mode, load) and what rides on it (a routine reading, or one that would trigger an action). What makes up a context is a parameter, `trust_context`, so a deployment can name the conditions that matter for its sources.
+- **Trust does not transfer between contexts.** A good record in one context lends nothing to another. A source reporting in a context where it has no record starts neutral there, and its reports are leads, as for a new source.
+- **Distrust may travel where trust may not.** A shift or self-contradiction found in one context is a reason to review the same source in its other contexts. It does not raise anything, and it lowers trust elsewhere only through that review. This asymmetry is deliberate: a covert source (below) may behave well where it is watched and badly where it is not.
+- **The context is read from the report and the conditions, never from the source's word.** A source that labels its own report as belonging to a context it is trusted in gains nothing. The node assigns the context from what it observes about the report.
+
 This differs from ADR-0007 as proposed in three places: section 1 makes a signature from an enrolled key a condition of admission, section 3 has a person set each pair's starting trust (here no human-set score counts), and section 4 counts checks made outside the swarm (a person's inspection, a reference instrument) as checks of a node, where this note treats them as data sources a report is compared against. These fit only if signatures are read as attribution, the person-set figure is replaced by the neutral prior, and an outside check counts as one more data source the node compares reports against. Whether to amend ADR-0007 is a matter for swarm, not this note.
+
+### Threat: the covert source
+
+The author names this threat (23 November 2026): *a covert node or agent may pretend to be good, then shift its behaviour in subtle ways, behaving in malicious ways or even accidentally contradicting itself.* A trust model built on behaviour over time is exactly what such a source exploits: it earns a record, then spends it. The shift may be sudden, which the behaviour test above catches, or slow and small enough that each report on its own looks normal.
+
+**Design: a record is never a licence, and checking never stops.** The design does not judge intent. A malicious shift, a faulty sensor and an honest self-contradiction are handled the same way, because each is a change in what the source's reports are worth:
+
+- **Weight stays bounded however good the record.** Each report is still capped by `max_confidence_delta`, and no record lifts a source past a ceiling (`trust_ceiling`). So a long good record buys a source a bounded amount of influence per report, never the power to move a belief alone.
+- **Recent behaviour is compared with the source's own long run, at more than one timescale.** A slow drift that no single report reveals shows up as a gap between a short window and a long one. That gap is evidence in the same way a sudden shift is (`behaviour_window` takes several durations, not one).
+- **A source is checked against itself.** Its reports are compared with its own earlier reports on the same thing, as well as with other sources. A source that contradicts itself loses weight whether or not anyone can yet say which of its reports was right.
+- **Checks continue on trusted sources.** Comparison against ground truth and independent sources goes on for every source, whatever its record, and the source cannot tell in advance which of its reports will be checked. A source that behaves well only when it expects to be checked gains nothing.
+- **A shift opens a review, it does not rewrite history.** When a shift or a self-contradiction is found, the beliefs that rest on that source's reports since the last point it was consistent are listed for review, as ADR-0007 section 7 does for revocation. Nothing is recomputed silently, and nothing is deleted.
+
+What this does not claim: a shift slower than the longest window, or one that stays inside the range of honest noise, can go unseen. Those limits are stated, not solved.
 
 ## Gaps
 
@@ -138,12 +159,13 @@ This differs from ADR-0007 as proposed in three places: section 1 makes a signat
 | Offline sync | ADR-0007 section 6 (late reports), Proposed; careful-memory ADR-0015 (optimistic locking), accepted, not built | How two stores that diverged while offline are merged. Append-only records help, since nothing is overwritten, but no repository says what happens when two devices revised the same belief apart. |
 | Rate limiting across devices | careful-memory ADR-0013 (Redis), accepted, not built | The distributed limiter, needed only where `rate_limit_scope` is `shared` (see layer 3). |
 | Shared causes | Stated as a limit in swarm ADR-0005; declared groups in ADR-0007 | Undeclared correlation still counts twice. No repository claims to detect it. |
+| The covert source | Behaviour-shift handling in this note (*Threat: the covert source*), Design | Any code. A shift slower than the longest window, or within honest noise, can go unseen. |
 | Budget | Nothing | No figure for memory, latency or power for any of the checks above. ADR-0007 calls its own budget claim THEORY until measured. |
 | One composed system | Nothing | No repository runs all five layers together. Each test above proves its layer in isolation. |
 
 ## Principles
 
-These are the design's fixed points, ten of them. A deployment may tune every parameter below, but no setting may break one of these.
+These are the design's fixed points, twelve of them. A deployment may tune every parameter below, but no setting may break one of these.
 
 1. **Evidence is admitted on its grounds, never on agreement, repetition, volume or fluency.** (Enforced in swarm for one store; proposed for peers in ADR-0006 and ADR-0007.)
 2. **Confidence and trust are derived from counts, never written.** (Enforced in swarm and careful-memory for beliefs; proposed for node trust in ADR-0007.)
@@ -155,6 +177,8 @@ These are the design's fixed points, ten of them. A deployment may tune every pa
 8. **Trust never rests on a cryptographic signature or a secret key.** A signature may help attribute a report; it never adds weight, and the design holds when a key is copied. (Design; the author, 23 November 2026.)
 9. **Trust never passes from peer to peer.** No endorsement, shared score or self-report raises it. (Design; the author, 23 November 2026.)
 10. **Trust rests on behaviour over time and consistency with other data sources.** It is built per node and per source. Ground truth outranks agreement, agreement counts only across sources that share no cause, no human-set score counts, and a change in behaviour is itself evidence. (Design; the author, 23 November 2026.)
+11. **A record is never a licence, and checking never stops.** Weight stays bounded however good the record; every source, however trusted, keeps being checked against other sources and against itself; a shift, sudden or slow, malicious or accidental, opens a review without rewriting history. (Design; the author, 23 November 2026.)
+12. **Trust is held per source and per context.** A good record in one context lends nothing to another. A shift in one context prompts a review in the others, and the node, not the source, decides which context a report belongs to. (Design; the author, 23 November 2026.)
 
 ## Parameters
 
@@ -167,8 +191,11 @@ Each choice the first draft left as an open question is now a parameter. The def
 | `weight_source` | 4 | the trust layer only | the trust layer | 1, 4 |
 | `egress_approval` | 5 | `each_time`, `pre_approved` | `each_time` if attended, else `pre_approved` with an empty list | 6 |
 | `starting_trust` | across | the neutral (uniform) prior; never a person-set figure | neutral, with reports treated as leads until a record is built | 1, 10 |
-| `behaviour_window` | across | a duration or a count of reports | left open; a deployment sets it to the pace its sources change at | 10 |
-| `behaviour_shift_test` | across | a pluggable test of rate, range or pattern against the source's own history | flag and review; never silently lower stored beliefs | 3, 10 |
+| `behaviour_window` | across | several durations or report counts, short to long | left open; a deployment sets them to the pace its sources change at | 10, 11 |
+| `trust_context` | across | a pluggable definition: kind of observation, plus conditions and stakes as the deployment names them | kind of observation alone (ADR-0007's pair), until a deployment names more | 12 |
+| `trust_ceiling` | across | a figure below certainty | left open; no source's record lifts it past this | 11 |
+| `check_selection` | across | a pluggable rule for which reports get checked | every source keeps being checked, and the source cannot predict which reports | 11 |
+| `behaviour_shift_test` | across | a pluggable test of rate, range, pattern or self-consistency against the source's own history | flag and review; never silently lower stored beliefs | 3, 10, 11 |
 | `trust_decay_without_checks` | across | none, or towards the starting figure | none | 2 |
 | `correlation_window` | across | a duration | left to ADR-0007's acceptance | 1 |
 | `attribution` | across | signature, physical channel, or a combination | whatever the deployment has; it never changes the weight | 8, 9 |
