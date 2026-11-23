@@ -129,6 +129,20 @@ Nothing else raises trust. Not a signature, which at most helps say which source
 
 This differs from ADR-0007 as proposed in three places: section 1 makes a signature from an enrolled key a condition of admission, section 3 has a person set each pair's starting trust (here no human-set score counts), and section 4 counts checks made outside the swarm (a person's inspection, a reference instrument) as checks of a node, where this note treats them as data sources a report is compared against. These fit only if signatures are read as attribution, the person-set figure is replaced by the neutral prior, and an outside check counts as one more data source the node compares reports against. Whether to amend ADR-0007 is a matter for swarm, not this note.
 
+### Threat: the covert source
+
+The author names this threat (23 November 2026): *a covert node or agent may pretend to be good, then shift its behaviour in subtle ways, behaving in malicious ways or even accidentally contradicting itself.* A trust model built on behaviour over time is exactly what such a source exploits: it earns a record, then spends it. The shift may be sudden, which the behaviour test above catches, or slow and small enough that each report on its own looks normal.
+
+**Design: a record is never a licence, and checking never stops.** The design does not judge intent. A malicious shift, a faulty sensor and an honest self-contradiction are handled the same way, because each is a change in what the source's reports are worth:
+
+- **Weight stays bounded however good the record.** Each report is still capped by `max_confidence_delta`, and no record lifts a source past a ceiling (`trust_ceiling`). So a long good record buys a source a bounded amount of influence per report, never the power to move a belief alone.
+- **Recent behaviour is compared with the source's own long run, at more than one timescale.** A slow drift that no single report reveals shows up as a gap between a short window and a long one. That gap is evidence in the same way a sudden shift is (`behaviour_window` takes several durations, not one).
+- **A source is checked against itself.** Its reports are compared with its own earlier reports on the same thing, as well as with other sources. A source that contradicts itself loses weight whether or not anyone can yet say which of its reports was right.
+- **Checks continue on trusted sources.** Comparison against ground truth and independent sources goes on for every source, whatever its record, and the source cannot tell in advance which of its reports will be checked. A source that behaves well only when it expects to be checked gains nothing.
+- **A shift opens a review, it does not rewrite history.** When a shift or a self-contradiction is found, the beliefs that rest on that source's reports since the last point it was consistent are listed for review, as ADR-0007 section 7 does for revocation. Nothing is recomputed silently, and nothing is deleted.
+
+What this does not claim: a shift slower than the longest window, or one that stays inside the range of honest noise, can go unseen. Those limits are stated, not solved.
+
 ## Gaps
 
 | Gap | What exists | What is missing |
@@ -138,6 +152,7 @@ This differs from ADR-0007 as proposed in three places: section 1 makes a signat
 | Offline sync | ADR-0007 section 6 (late reports), Proposed; careful-memory ADR-0015 (optimistic locking), accepted, not built | How two stores that diverged while offline are merged. Append-only records help, since nothing is overwritten, but no repository says what happens when two devices revised the same belief apart. |
 | Rate limiting across devices | careful-memory ADR-0013 (Redis), accepted, not built | The distributed limiter, needed only where `rate_limit_scope` is `shared` (see layer 3). |
 | Shared causes | Stated as a limit in swarm ADR-0005; declared groups in ADR-0007 | Undeclared correlation still counts twice. No repository claims to detect it. |
+| The covert source | Behaviour-shift handling in this note (*Threat: the covert source*), Design | Any code. A shift slower than the longest window, or within honest noise, can go unseen. |
 | Budget | Nothing | No figure for memory, latency or power for any of the checks above. ADR-0007 calls its own budget claim THEORY until measured. |
 | One composed system | Nothing | No repository runs all five layers together. Each test above proves its layer in isolation. |
 
@@ -154,9 +169,7 @@ These are the design's fixed points, ten of them. A deployment may tune every pa
 7. **A check that guards the device runs on the device.** It needs no network to say no. (Design, following ADR-0007 section 8.)
 8. **Trust never rests on a cryptographic signature or a secret key.** A signature may help attribute a report; it never adds weight, and the design holds when a key is copied. (Design; the author, 23 November 2026.)
 9. **Trust never passes from peer to peer.** No endorsement, shared score or self-report raises it. (Design; the author, 23 November 2026.)
-10. **Trust rests on behaviour over time and consistency with other data sources.** It is built per node and per source. Ground truth outranks agreement, agreement counts only across sources that share no cause, no human-set score counts, and a change in behaviour is itself evidence. (Design; the author, 23 November 2026.)
-
-## Parameters
+10. **Trust rests on behaviour over time and consistency with other data sources.** It is built per node and per source. Ground truth outranks agreement, agreement counts only across sources that share no cause, no human-set score counts, and a change in behaviour is itself evidence. 
 
 Each choice the first draft left as an open question is now a parameter. The default is the safe setting when nothing else is known.
 
