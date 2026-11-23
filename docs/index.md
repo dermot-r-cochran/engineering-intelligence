@@ -20,6 +20,8 @@ Engineering Intelligence examines how people, AI, repositories, and knowledge pr
 
 From 22 November 2026 the overall research direction across the repositories mapped in [Where this is practised](evidence.md) is edge AI: systems that reason and act on the device, within tight budgets for compute, memory, power and latency, and often offline. Embodied AI (robots and cobots) is edge AI on a body, and cognitive engineering is the design question asked of both. None of the repositories yet does edge work, so for now this is a direction, not a finding: where a repository has a choice of approach, the one that serves edge use is preferred, and what it shows will be recorded on the evidence page like any other result.
 
+A first [edge AI trust model note](notes/edge-trust-model.md) (draft, 22 November 2026) reads what the repositories already enforce, layer by layer, and lists the gaps.
+
 ## Suggested paths
 
 - **Building with AI:** Start with [human-AI systems](human-ai-systems.md), then read [context engineering](context-engineering.md) and [AI evaluation](ai-evaluation.md).
