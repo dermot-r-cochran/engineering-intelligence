@@ -127,6 +127,13 @@ Nothing else raises trust. Not a signature, which at most helps say which source
 - **Attribution is pluggable.** How a report is tied to a source is a parameter, `attribution`: a signature, the physical channel it arrived on, or a combination. No choice changes the weight.
 - **No global score.** Two nodes may hold different trust in the same source, because each compared it against different data. That is intended: there is no shared trust table to poison.
 
+**Design: trust is held per context, not per source.** A source may be semi-trusted in one context and less so in another (the author, 23 November 2026). A temperature probe can be reliable indoors and drift in direct sun. A peer can be sound on its own site's readings and poor at summarising another's logs. An agent can be careful with routine requests and careless with unusual ones. So the record described above is kept for each pair of source and context, never for the source alone:
+
+- **A context is more than a kind of observation.** ADR-0007 already holds trust per node and per kind of observation. Here a context can also include the conditions a report was made under (place, time of day, operating mode, load) and what rides on it (a routine reading, or one that would trigger an action). What makes up a context is a parameter, `trust_context`, so a deployment can name the conditions that matter for its sources.
+- **Trust does not transfer between contexts.** A good record in one context lends nothing to another. A source reporting in a context where it has no record starts neutral there, and its reports are leads, as for a new source.
+- **Distrust may travel where trust may not.** A shift or self-contradiction found in one context is a reason to review the same source in its other contexts. It does not raise anything, and it lowers trust elsewhere only through that review. This asymmetry is deliberate: a covert source (below) may behave well where it is watched and badly where it is not.
+- **The context is read from the report and the conditions, never from the source's word.** A source that labels its own report as belonging to a context it is trusted in gains nothing. The node assigns the context from what it observes about the report.
+
 This differs from ADR-0007 as proposed in three places: section 1 makes a signature from an enrolled key a condition of admission, section 3 has a person set each pair's starting trust (here no human-set score counts), and section 4 counts checks made outside the swarm (a person's inspection, a reference instrument) as checks of a node, where this note treats them as data sources a report is compared against. These fit only if signatures are read as attribution, the person-set figure is replaced by the neutral prior, and an outside check counts as one more data source the node compares reports against. Whether to amend ADR-0007 is a matter for swarm, not this note.
 
 ### Threat: the covert source
@@ -158,7 +165,7 @@ What this does not claim: a shift slower than the longest window, or one that st
 
 ## Principles
 
-These are the design's fixed points, eleven of them. A deployment may tune every parameter below, but no setting may break one of these.
+These are the design's fixed points, twelve of them. A deployment may tune every parameter below, but no setting may break one of these.
 
 1. **Evidence is admitted on its grounds, never on agreement, repetition, volume or fluency.** (Enforced in swarm for one store; proposed for peers in ADR-0006 and ADR-0007.)
 2. **Confidence and trust are derived from counts, never written.** (Enforced in swarm and careful-memory for beliefs; proposed for node trust in ADR-0007.)
@@ -171,6 +178,7 @@ These are the design's fixed points, eleven of them. A deployment may tune every
 9. **Trust never passes from peer to peer.** No endorsement, shared score or self-report raises it. (Design; the author, 23 November 2026.)
 10. **Trust rests on behaviour over time and consistency with other data sources.** It is built per node and per source. Ground truth outranks agreement, agreement counts only across sources that share no cause, no human-set score counts, and a change in behaviour is itself evidence. (Design; the author, 23 November 2026.)
 11. **A record is never a licence, and checking never stops.** Weight stays bounded however good the record; every source, however trusted, keeps being checked against other sources and against itself; a shift, sudden or slow, malicious or accidental, opens a review without rewriting history. (Design; the author, 23 November 2026.)
+12. **Trust is held per source and per context.** A good record in one context lends nothing to another. A shift in one context prompts a review in the others, and the node, not the source, decides which context a report belongs to. (Design; the author, 23 November 2026.)
 
 ## Parameters
 
@@ -184,6 +192,7 @@ Each choice the first draft left as an open question is now a parameter. The def
 | `egress_approval` | 5 | `each_time`, `pre_approved` | `each_time` if attended, else `pre_approved` with an empty list | 6 |
 | `starting_trust` | across | the neutral (uniform) prior; never a person-set figure | neutral, with reports treated as leads until a record is built | 1, 10 |
 | `behaviour_window` | across | several durations or report counts, short to long | left open; a deployment sets them to the pace its sources change at | 10, 11 |
+| `trust_context` | across | a pluggable definition: kind of observation, plus conditions and stakes as the deployment names them | kind of observation alone (ADR-0007's pair), until a deployment names more | 12 |
 | `trust_ceiling` | across | a figure below certainty | left open; no source's record lifts it past this | 11 |
 | `check_selection` | across | a pluggable rule for which reports get checked | every source keeps being checked, and the source cannot predict which reports | 11 |
 | `behaviour_shift_test` | across | a pluggable test of rate, range, pattern or self-consistency against the source's own history | flag and review; never silently lower stored beliefs | 3, 10, 11 |
