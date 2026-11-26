@@ -2,13 +2,15 @@
 
 *Draft, 22 November 2026; open questions generalised into principles and parameters, 23 November 2026. Nothing here is built as one system. This note reads what the repositories already enforce, layer by layer, against the [research direction](../index.md#research-direction) of edge AI, and lists what is missing.*
 
+*Not in the draft: on 23 November 2026 swarm accepted ADR-0006 and ADR-0007 and built the peer trust layer, with guard tests. The text below is the draft as written. Where it says Proposed, "not built" or "any code" of that layer, [Not in the draft](#not-in-the-draft-what-swarm-accepted-and-built) has the status as of 26 November 2026.*
+
 ## What this note is
 
 An edge device reasons and acts on its own hardware, often offline, within tight budgets, and sometimes alongside other devices. A trust model for such a device has to answer five questions: what evidence may come in, how a belief changes, what may be written to memory, how the views of several agents are combined, and what may leave the device.
 
 Several repositories by the same author already answer one of those questions each, with a test behind the answer. None was written for the edge, and none knows about the others. This note puts them in one order so that the gaps between them are visible.
 
-Every statement below carries one of three labels, following the distinction [AGENTS.md](../../AGENTS.md) asks for:
+Every statement below carries one of three labels, following the distinction [AGENTS.md](https://github.com/dermot-r-cochran/engineering-intelligence/blob/main/AGENTS.md) asks for:
 
 - **Enforced:** in code today, with a named test that fails if it is broken. The test is the citation.
 - **Proposed:** written down in a decision record that has not been accepted. Nothing is built.
@@ -217,3 +219,43 @@ Each choice the first draft left as an open question is now a parameter. The def
 | `attribution` | across | signature, physical channel, or a combination | whatever the deployment has; it never changes the weight | 8, 9 |
 
 `starting_trust`, `trust_decay_without_checks` and `correlation_window` are the items ADR-0007 itself leaves open; they are listed so that one table holds every choice. Where this note's design should eventually be recorded as a decision, and in which repository, is a separate question: the note binds nothing, and an ADR binds only in its own repository.
+
+## Not in the draft: what swarm accepted and built
+
+*Added 26 November 2026. Most of what follows happened in swarm before the draft's last revision on 23 November 2026, and the draft did not take it in. Everything above is that draft and is left as written, apart from the target of its link to AGENTS.md, which did not resolve on the published site. This section records what [swarm](https://github.com/dermot-r-cochran/swarm)'s own record says, read at its commit `475c61b` (23 November 2026, its CI green). It adds no design of its own.*
+
+**Accepted, where the draft says Proposed.** The author accepted ADR-0006 and ADR-0007 on 23 November 2026 (swarm pull request #49), after ADR-0007 was redrafted on 22 and 23 November (#45, #46 and #48). On the three places where the draft says it differs from ADR-0007 as proposed, the accepted text reads as follows. A signature is "an optional integrity check, not a ground for trust" (section 1). A new pair of source and context starts at the uniform prior, and no person sets a figure in the trust record (sections 2 and 3). A person's inspection or a reference instrument is ground truth, one of the two kinds of check a report is held against (section 4). The record's own list of what it leaves open now reads "nothing in this record".
+
+**Built, where the draft says there is no code.** The node is `episteme/edge.py`, in the package since #50, and its guards are in `tests/test_edge.py`. `Evidence` carries its source since #51, as `node` and `kind`, both part of its id (`tests/test_models.py::TestEvidence::test_the_sending_node_and_kind_are_part_of_the_id`). For a report that arrives through the node, the edge gap under layer 1 is closed: the weight it is admitted at is the receiving node's own record of that source, which the source may lower and never raise.
+
+What a test in `tests/test_edge.py` now pins, against the principles the draft labels proposed or Design for the peer layer:
+
+| Principle | Draft label | What a swarm test now pins | Guard |
+| --- | --- | --- | --- |
+| 1 | proposed for peers | Agreement among unverified peers verifies no source and moves no belief. A hypothesis is held as a claim and never stored as a belief. | `test_agreement_among_unverified_peers_verifies_nothing`, `test_a_hypothesis_is_held_as_a_claim_and_never_stored_as_a_belief` |
+| 2 | proposed for node trust | No method that writes to the trust ledger has a parameter for a trust figure, a score, a vouch or a count. | `test_no_method_takes_a_figure_a_vouch_or_a_count` |
+| 4 | Design | A source can lower the weight its report is admitted at and never raise it, and nothing a source sends changes the trust held in it. | `test_a_source_can_lower_its_own_weight_but_never_raise_it`, `test_no_figure_a_source_sends_changes_the_trust_held_in_it` |
+| 8 | Design | A signed and an unsigned report, from sources with the same record, are admitted at the same weight. | `test_a_signature_never_changes_an_items_weight` |
+| 9 | Design | The guards of rows 1 and 2: agreement among unverified peers verifies nothing, and the ledger takes no vouch. | as rows 1 and 2 |
+| 10 | Design | A new source is neutral and unverified, and sends only leads. Consistency with the node's own data verifies it. A reference must be independent and verified. Ground truth weighs more than consistency. | `test_a_new_source_is_neutral_and_unverified_and_sends_only_leads`, `test_consistency_with_the_nodes_own_data_verifies_a_source`, `test_a_reference_must_be_independent_and_verified`, `test_ground_truth_outranks_consistency` |
+| 11 | Design | Trust has a ceiling and recent outcomes count most. Which reports are audited is drawn without regard to the record. Self-contradiction and slow drift suspend a verified source. A suspension lists beliefs for review and recomputes none. | `test_recent_behaviour_counts_most_and_trust_has_a_ceiling`, `test_audits_never_stop_and_ignore_the_record`, `test_a_source_that_contradicts_itself_is_suspended`, `test_a_slow_drift_is_caught_while_every_single_report_still_passes`, `test_a_verified_source_checked_wrong_is_suspended_and_nothing_recomputed` |
+| 12 | Design | A record earned in one context gives no weight in another, and a failure in one leaves the other's weight as it was. | `test_a_source_trusted_in_one_context_is_not_trusted_in_another` |
+| 13 | Design | Each check moves only its own facet. A source accurate but late is relied on where lateness does not matter. The set of facets is the node's own. | `test_each_check_moves_only_its_own_facet`, `test_a_source_accurate_but_late_is_relied_on_where_lateness_does_not_matter`, `test_the_set_of_facets_is_the_nodes_own` |
+
+What is pinned of principle 4 is narrower than the principle, and holds only for reports through the node: a source cannot raise the weight its report is admitted at (the first difference below). foundation-model has not changed, so its self-reported loss and agreement-based reputation stand as layer 4 describes them. Principles 3, 5, 6 and 7 are as the draft labels them; the section 8 that principle 7 follows is section 9 of the accepted text.
+
+**Places where the accepted record and this note's Design differ.** Five were found on this reading, and the list is not claimed to be complete. They are not reconciled here. The ADR binds in swarm and this note binds nothing, so which of the two should move is the author's question.
+
+- **A source's own figure.** Here a contributor's weight is never stated by the contributor about itself. In swarm a source cannot raise its weight, but it may lower it: "A node may state a lower reliability for its own reading, and the lower figure is used" (section 2).
+- **Defaults.** This note gives most parameters a default, such as the four starting facets. ADR-0007 section 10 builds in none: "no figure is built into the mechanism, not even as a default" (`test_the_mechanism_has_no_figure_of_its_own`).
+- **Combining facets.** Here `facet_combination` is a pluggable rule, whose default is the lowest relevant facet. In swarm the rule is fixed: the least of the relevant facets that have been checked, and "a facet not yet checked neither raises nor lowers it" (section 2).
+- **A shift.** Here a shift triggers a review of the source and lowers the weight of its newer reports until they are consistent again. In swarm a verified source that fails a ground-truth check, contradicts itself or drifts is suspended: its reports are recorded and not admitted, and "agreement with other data alone does not lift a suspension" (section 8; `test_only_ground_truth_lifts_a_suspension`).
+- **Open items.** The closing paragraph of *Parameters* names three items that ADR-0007 leaves open. The accepted record leaves none open.
+
+**The gaps table, read again.**
+
+- **Peer trust.** Acceptance, the source field on `Evidence`, the per-node record and the guard tests now exist in swarm.
+- **Device identity.** Enrolment, revocation and an optional verifier are code (`test_unenrolled_forged_and_revoked_packets_are_refused_whole`). What someone who claims an enrolled name can do is bounded by the cap and by ground truth (`test_an_impostor_using_an_enrolled_id_is_bounded_by_the_cap_and_by_ground_truth`). ADR-0007 calls that bound THEORY, "not a measured resistance to any attack".
+- **The covert source.** The code and its guards are in row 11 above. The limit stands, in the accepted record's words: a node that lies rarely, or only on reports that are hard to check, "may go unnoticed for longer than the check rate suggests; how long is unmeasured".
+- **Offline sync.** ADR-0007 section 6 is accepted with the rest. How two stores that diverged are merged is still unanswered, and ADR-0006 keeps each node's memory its own: "no node's memory is shared".
+- **Still as the draft has them.** Undeclared shared causes still count twice (ADR-0007 section 5). No budget is measured: "no measurement exists yet" (section 9). No repository runs all five layers together. swarm's node runs admission, belief update, exact aggregation and peer trust in one module, which imports only swarm's own package and the standard library, so neither careful-memory's write gate nor an egress door is part of it. Rate limiting across devices is unchanged: careful-memory's ADR index, at its commit `d466afc` (25 November 2026), still lists ADR-0013 as accepted and not yet built.
